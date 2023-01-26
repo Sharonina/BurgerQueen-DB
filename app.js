@@ -10,8 +10,6 @@ const { HASH_STEPS, JWT_SECRET } = process.env;
 
 const app = express();
 
-app.use(express.json());
-
 app.get("/users", async (req, res) => {
   const users = await UserModel.find().exec();
   res.status(200).send(users);
@@ -65,8 +63,22 @@ app.post("/users", async (req, res) => {
   }
 });
 
-// put
-// delete
+app.put("/users/:userId", async (req, res) => {
+  const body = req.body;
+  const { userId } = req.params;
+  const users = await UserModel.findByIdAndUpdate(
+    userId,
+    { $set: body },
+    { new: true } //para que retorne el obj nuevo y no el anterior
+  ).exec();
+  res.status(200).send(users);
+});
+
+app.delete("/users/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const user = await UserModel.findByIdAndDelete(userId).exec();
+  res.status(200).send({ message: "Usuario eliminado exitosamente" });
+});
 
 app.post("/login", (req, res) => {
   //login logica aqui
