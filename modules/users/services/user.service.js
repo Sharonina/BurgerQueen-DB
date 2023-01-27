@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { errorObject } = require("../../../utils/errors.utils");
 
 const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
@@ -9,6 +10,15 @@ class UserService {
 
   // get all users
   async getAllUsers(limit = 5, offset = 0) {
+    if (isNaN(limit) || isNaN(offset)) {
+      throw errorObject(400, "Limit y Offset deben ser números");
+    }
+    if (limit < 1 || offset < 0) {
+      throw errorObject(
+        400,
+        "Limit debe ser mayor a 1 y Offset debe ser mayor o igual a 0"
+      );
+    }
     return await UserModel.find().skip(offset).limit(limit).exec();
   }
 
@@ -22,17 +32,13 @@ class UserService {
     // validate request
     const { first_name, last_name, email, password } = userData;
     if (!(email && password && first_name && last_name)) {
-      const error = new Error("Todos los campos son requeridos");
-      error.statusCode = 400;
-      throw error;
+      throw errorObject(400, "Todos los campos son requeridos");
     }
 
     // check if user already exist
     const oldUser = await UserModel.findOne({ email });
     if (oldUser) {
-      const error = new Error("Usuario registrado. Por favor inicia sesión");
-      error.statusCode = 409;
-      throw error;
+      throw errorObject(409, "Usuario registrado. Por favor inicia sesión");
     }
 
     // encrypt user password
@@ -72,9 +78,7 @@ class UserService {
     if (user) {
       return { message: "Usuario eliminado exitosamente" };
     }
-    const error = new Error("Usuario no encontrado");
-    error.statusCode = 404;
-    throw error;
+    throw errorObject(404, "Usuario no encontrado");
   }
 }
 

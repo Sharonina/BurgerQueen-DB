@@ -6,10 +6,14 @@ const UserModel = require("../models/user.model");
 const userService = new UserService();
 const router = express.Router();
 
-router.get("", async (req, res) => {
-  const { limit, offset } = req.query;
-  const users = await userService.getAllUsers(limit, offset);
-  res.status(200).send(users);
+router.get("/", async (req, res, next) => {
+  try {
+    const { limit, offset } = req.query;
+    const users = await userService.getAllUsers(limit, offset);
+    res.status(200).send(users);
+  } catch (error) {
+    res.status(error.statusCode || 500).send({ message: error.message });
+  }
 });
 
 router.get("/:userId", async (req, res) => {
