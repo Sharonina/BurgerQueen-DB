@@ -1,87 +1,11 @@
-require("dotenv").config();
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+require("dotenv").config(); //expone las variables de entorno con process.env
+const express = require("express"); //framework de node para bknd
 
 require("./config/database").connect();
-const UserModel = require("./model/user");
+const routerApi = require("./router");
 
-const { HASH_STEPS, JWT_SECRET } = process.env;
-
-const app = express();
-
-app.get("/users", async (req, res) => {
-  const users = await UserModel.find().exec();
-  res.status(200).send(users);
-});
-
-app.get("/users/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const users = await UserModel.findById(userId).exec();
-  res.status(200).send(users);
-});
-
-app.post("/users", async (req, res) => {
-  try {
-    // validate request
-    const { first_name, last_name, email, password } = req.body;
-    if (!(email && password && first_name && last_name)) {
-      res.status(400).send("Todos los campos son requeridos");
-    }
-
-    // check if user already exist
-    const oldUser = await UserModel.findOne({ email });
-    if (oldUser) {
-      return res
-        .status(409)
-        .send("Usuario registrado. Por favor inicia sesión");
-    }
-
-    // encrypt user password
-    const encryptedPassword = await bcrypt.hash(password, parseInt(HASH_STEPS));
-
-    // create user in db
-    const user = await UserModel.create({
-      first_name,
-      last_name,
-      email: email.toLowerCase(),
-      password: encryptedPassword,
-    });
-
-    // create token
-    const token = jwt.sign({ user_id: user._id, email }, JWT_SECRET, {
-      expiresIn: "24h",
-    });
-
-    user.save();
-
-    //return new user
-    const expireDate = new Date().setDate(new Date().getDate() + 1);
-    res.status(201).json({ token: token, expireDate });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-app.put("/users/:userId", async (req, res) => {
-  const body = req.body;
-  const { userId } = req.params;
-  const users = await UserModel.findByIdAndUpdate(
-    userId,
-    { $set: body },
-    { new: true } //para que retorne el obj nuevo y no el anterior
-  ).exec();
-  res.status(200).send(users);
-});
-
-app.delete("/users/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const user = await UserModel.findByIdAndDelete(userId).exec();
-  res.status(200).send({ message: "Usuario eliminado exitosamente" });
-});
-
-app.post("/login", (req, res) => {
-  //login logica aqui
-});
+const app = express(); //instancia de express en app
+app.use(express.json()); //middleware: transforma el json que mandamos para poder leerlo
+routerApi(app);
 
 module.exports = app;
