@@ -12,24 +12,23 @@ router.get("/", async (req, res, next) => {
     const users = await userService.getAllUsers(limit, offset);
     res.status(200).send(users);
   } catch (error) {
-    res.status(error.statusCode || 500).send({ message: error.message });
+    next(error);
   }
 });
 
-router.get("/:userId", async (req, res) => {
+router.get("/:userId", async (req, res, next) => {
   const { userId } = req.params;
   const user = await userService.getUserById(userId);
   res.status(200).send(user);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   try {
     const body = req.body;
-
     const user = await userService.createUser(body);
     res.status(201).json(user);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
