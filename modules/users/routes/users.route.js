@@ -1,15 +1,14 @@
 const express = require("express");
 
 const UserService = require("../services/user.service");
-const UserModel = require("../models/user.model");
 
 const userService = new UserService();
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const { limit, offset } = req.query;
-    const users = await userService.getAllUsers(limit, offset);
+    const { limit, page } = req.query;
+    const users = await userService.getAllUsers(limit, page);
     res.status(200).send(users);
   } catch (error) {
     next(error);
@@ -17,9 +16,13 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/:userId", async (req, res, next) => {
-  const { userId } = req.params;
-  const user = await userService.getUserById(userId);
-  res.status(200).send(user);
+  try {
+    const { userId } = req.params;
+    const user = await userService.getUserById(userId);
+    res.status(200).send(user);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/", async (req, res, next) => {
@@ -32,17 +35,25 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:userId", async (req, res) => {
-  const body = req.body;
-  const { userId } = req.params;
-  const user = await userService.updateUserById(userId, body);
-  res.status(200).send(user);
+router.put("/:userId", async (req, res, next) => {
+  try {
+    const body = req.body;
+    const { userId } = req.params;
+    const user = await userService.updateUserById(userId, body);
+    res.status(200).send(user);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete("/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const user = await userService.deleteUserById(userId);
-  res.status(200).send(user);
+router.delete("/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await userService.deleteUserById(userId);
+    res.status(200).send(user);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/login", (req, res) => {

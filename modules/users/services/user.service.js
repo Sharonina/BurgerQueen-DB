@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { errorObject } = require("../../../utils/errors.utils");
+const mongoose = require("mongoose");
 
 const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
@@ -9,29 +10,37 @@ class UserService {
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get all users
-  async getAllUsers(limit = 5, offset = 0) {
-    if (isNaN(limit) || isNaN(offset)) {
-      throw errorObject(400, "Limit y Offset deben ser números");
+  async getAllUsers(limit = 5, page = 1) {
+    if (isNaN(limit) || isNaN(page)) {
+      throw errorObject(400, "Limit y page deben ser números");
     }
-    if (limit < 1 || offset < 0) {
-      throw errorObject(
-        400,
-        "Limit debe ser mayor a 1 y Offset debe ser mayor o igual a 0"
-      );
+    if (limit < 1 || page < 1) {
+      throw errorObject(400, "Limit y page deben ser mayor a 1");
     }
-    return await UserModel.find().skip(offset).limit(limit).exec();
+    return await UserModel.find()
+      .limit(limit)
+      .skip(limit * (page - 1))
+      .exec();
   }
 
   // get user by id
   async getUserById(userId) {
-    return await UserModel.findById(userId).exec();
+    const isMongoId = mongoose.Types.ObjectId.isValid(userId);
+    if (!isMongoId) {
+      throw errorObject(400, "Id de usuario invalido");
+    }
+    const user = await UserModel.findById(userId).exec();
+    if (!user) {
+      throw errorObject(404, "Usuario no encontrado");
+    }
+    return user;
   }
 
   // create user
   async createUser(userData) {
     // validate request
-    const { first_name, last_name, email, password } = userData;
-    if (!(email && password && first_name && last_name)) {
+    const { first_name, last_name, email, password, role, admin } = userData;
+    if (!(email && password && first_name && last_name && role)) {
       throw errorObject(400, "Todos los campos son requeridos");
     }
 
@@ -50,6 +59,8 @@ class UserService {
       last_name,
       email: email.toLowerCase(),
       password: encryptedPassword,
+      role,
+      admin,
     });
 
     // create token
@@ -65,20 +76,40 @@ class UserService {
 
   // update user by id
   async updateUserById(userId, userData) {
-    return await UserModel.findByIdAndUpdate(
+    const isMongoId = mongoose.Types.ObjectId.isValid(userId);
+    if (!isMongoId) {
+      throw errorObject(400, "Id de usuario invalido");
+    }
+    if (userData?.password) {
+      const encryptedPassword = await bcrypt.hash(
+        userData.password,
+        parseInt(HASH_STEPS)
+      );
+      userData.password = encryptedPassword;
+    }
+    const user = await UserModel.findByIdAndUpdate(
       userId,
       { $set: userData }, // para que no genere dobles
       { new: true } //para que retorne el obj nuevo y no el anterior
     ).exec();
+
+    if (!user) {
+      throw errorObject(404, "usuario no encontrado");
+    }
+    return user;
   }
 
   // delete user by id
   async deleteUserById(userId) {
-    const user = await UserModel.findByIdAndDelete(userId).exec();
-    if (user) {
-      return { message: "Usuario eliminado exitosamente" };
+    const isMongoId = mongoose.Types.ObjectId.isValid(userId);
+    if (!isMongoId) {
+      throw errorObject(400, "Id de usuario invalido");
     }
-    throw errorObject(404, "Usuario no encontrado");
+    const user = await UserModel.findByIdAndDelete(userId).exec();
+    if (!user) {
+      throw errorObject(404, "Usuario no encontrado");
+    }
+    return user;
   }
 }
 
