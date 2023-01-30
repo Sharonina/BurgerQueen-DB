@@ -1,7 +1,7 @@
-/* const OrderModel = require("../models/order.model");
+const OrderModel = require("../models/order.model");
 
 class OrderService {
   constructor() {}
 }
 
-module.exports = OrderService; */
+module.exports = OrderService;
