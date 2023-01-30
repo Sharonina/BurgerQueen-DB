@@ -8,4 +8,4 @@ const productSchema = new mongoose.Schema({
   // restaurrant: { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
 });
 
-module.exports = mongoose.model("producto", productSchema); //enviamos el schema como modelo
+module.exports = mongoose.model("product", productSchema); //enviamos el schema como modelo
