@@ -7,7 +7,11 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, required: true },
   admin: { type: Boolean, default: false },
-  // restaurrant: { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
+  restaurant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "restaurant",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema); //enviamos el schema como modelo

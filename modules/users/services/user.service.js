@@ -7,7 +7,7 @@ const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
 
 class UserService {
-  roles = ["mesero", "cocinero"];
+  roles = ["mesero", "cocinero", "gerente", "administrador"];
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get all users
@@ -30,7 +30,7 @@ class UserService {
     if (!isMongoId) {
       throw errorObject(400, "Id de usuario invalido");
     }
-    const user = await UserModel.findById(userId).exec();
+    const user = await UserModel.findById(userId).populate("restaurant").exec();
     if (!user) {
       throw errorObject(404, "Usuario no encontrado");
     }
