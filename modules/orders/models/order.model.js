@@ -7,7 +7,7 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, default: "pending", required: true },
   date_entry: { type: Date, default: new Date(), required: true },
   date_processed: { type: Date, default: null },
-  // restaurrant: { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
+  // restaurant: { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
 });
 
 module.exports = mongoose.model("order", orderSchema); //enviamos el schema como modelo
