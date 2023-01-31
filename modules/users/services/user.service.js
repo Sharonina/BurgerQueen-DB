@@ -7,7 +7,7 @@ const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
 
 class UserService {
-  roles = ["mesero", "cocinero"];
+  roles = ["mesero", "cocinero", "gerente", "administrador"];
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get all users
