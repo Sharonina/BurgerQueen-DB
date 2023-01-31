@@ -41,7 +41,7 @@ router.post("/", isAdminMiddleware, async (req, res, next) => {
   }
 });
 
-router.put("/:productId", async (req, res, next) => {
+router.put("/:productId", isAdminMiddleware, async (req, res, next) => {
   try {
     const body = req.body;
     const { productId } = req.params;
@@ -52,7 +52,7 @@ router.put("/:productId", async (req, res, next) => {
   }
 });
 
-router.delete("/:productId", async (req, res, next) => {
+router.delete("/:productId", isAdminMiddleware, async (req, res, next) => {
   try {
     const { productId } = req.params;
     const product = await productService.deleteProductById(productId);
