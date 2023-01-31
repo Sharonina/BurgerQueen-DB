@@ -2,6 +2,7 @@ const express = require("express");
 const {
   verifyTokenMiddleware,
   isAdminMiddleware,
+  hasAdminRegisterKeyMiddleware,
 } = require("../../../middleware/auth");
 
 const UserService = require("../services/user.service");
@@ -32,7 +33,18 @@ router.get("/:userId", verifyTokenMiddleware, async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/admin", hasAdminRegisterKeyMiddleware, async (req, res, next) => {
+  try {
+    const body = req.body;
+    body.admin = true;
+    const user = await userService.createUser(body);
+    res.status(201).json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/", adminMiddlewares, async (req, res, next) => {
   try {
     const body = req.body;
     const user = await userService.createUser(body);

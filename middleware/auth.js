@@ -43,4 +43,18 @@ const isAdminMiddleware = async (req, res, next) => {
   next();
 };
 
-module.exports = { verifyTokenMiddleware, isAdminMiddleware };
+const hasAdminRegisterKeyMiddleware = async (req, res, next) => {
+  const { ADMIN_REGISTER_KEY } = process.env;
+  const { adminregisterkey } = req.headers;
+  if (adminregisterkey !== ADMIN_REGISTER_KEY) {
+    const error = errorObject(403, "Llave de administrador invalida");
+    next(error);
+  }
+  next();
+};
+
+module.exports = {
+  verifyTokenMiddleware,
+  isAdminMiddleware,
+  hasAdminRegisterKeyMiddleware,
+};
