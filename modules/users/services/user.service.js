@@ -124,8 +124,8 @@ class UserService {
   }
 
   //login user
-  async login(userDate) {
-    const { email, password } = userDate;
+  async login(userData) {
+    const { email, password } = userData;
     if (!(email && password)) {
       throw errorObject(400, "Todos los campos son requeridos");
     }
@@ -133,7 +133,7 @@ class UserService {
     if (!user) {
       throw errorObject(400, "Credenciales invalidas");
     }
-    const isPasswordValid = await bcrypt.compere(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw errorObject(400, "Credenciales invalidas");
     }

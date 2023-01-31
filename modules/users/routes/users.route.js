@@ -65,7 +65,7 @@ router.delete("/:userId", adminMiddlewares, async (req, res, next) => {
 
 router.post("/login", async (req, res, next) => {
   try {
-    const { body } = req.body;
+    const body = req.body;
     const loginResponse = await userService.login(body);
     res.status(200).send(loginResponse);
   } catch (error) {
