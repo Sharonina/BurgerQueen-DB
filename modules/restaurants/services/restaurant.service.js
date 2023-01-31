@@ -7,7 +7,7 @@ class RestaurantService {
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get restaurant by id
-  async getUserById(restaurantId) {
+  async getRestaurantById(restaurantId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurantId);
     if (!isMongoId) {
       throw errorObject(400, "Id de restaurante invalido");
@@ -27,14 +27,8 @@ class RestaurantService {
       throw errorObject(400, "Todos los campos son requeridos");
     }
 
-    // check if restaurant already exist
-    const oldRestaurant = await RestaurantModel.findOne({ email });
-    if (oldRestaurant) {
-      throw errorObject(409, "Este restaurante ya se encuentra registrado");
-    }
-
     // create restaurant in db
-    const newRestaurant = await new RestaurantModel(restaurant);
+    const newRestaurant = await new RestaurantModel(restaurantData);
     return newRestaurant.save();
   }
 

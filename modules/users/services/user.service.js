@@ -30,7 +30,7 @@ class UserService {
     if (!isMongoId) {
       throw errorObject(400, "Id de usuario invalido");
     }
-    const user = await UserModel.findById(userId).exec();
+    const user = await UserModel.findById(userId).populate("restaurant").exec();
     if (!user) {
       throw errorObject(404, "Usuario no encontrado");
     }
