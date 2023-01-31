@@ -1,11 +1,18 @@
 const express = require("express");
+const {
+  verifyTokenMiddleware,
+  isAdminMiddleware,
+} = require("../../../middleware/auth");
 
 const UserService = require("../services/user.service");
 
 const userService = new UserService();
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+const authenticationMiddlewares = [verifyTokenMiddleware];
+const adminMiddlewares = [...authenticationMiddlewares, isAdminMiddleware];
+
+router.get("/", adminMiddlewares, async (req, res, next) => {
   try {
     const { limit, page } = req.query;
     const users = await userService.getAllUsers(limit, page);
@@ -15,7 +22,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:userId", async (req, res, next) => {
+router.get("/:userId", verifyTokenMiddleware, async (req, res, next) => {
   try {
     const { userId } = req.params;
     const user = await userService.getUserById(userId);
@@ -35,7 +42,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:userId", async (req, res, next) => {
+router.put("/:userId", adminMiddlewares, async (req, res, next) => {
   try {
     const body = req.body;
     const { userId } = req.params;
@@ -46,7 +53,7 @@ router.put("/:userId", async (req, res, next) => {
   }
 });
 
-router.delete("/:userId", async (req, res, next) => {
+router.delete("/:userId", adminMiddlewares, async (req, res, next) => {
   try {
     const { userId } = req.params;
     const user = await userService.deleteUserById(userId);

@@ -7,6 +7,7 @@ const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
 
 class UserService {
+  roles = ["mesero", "cocinero"];
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get all users
@@ -44,6 +45,10 @@ class UserService {
       throw errorObject(400, "Todos los campos son requeridos");
     }
 
+    if (!this.roles.includes(role)) {
+      throw errorObject(400, "El role debe ser mesero o cocinero");
+    }
+
     // check if user already exist
     const oldUser = await UserModel.findOne({ email });
     if (oldUser) {
@@ -76,13 +81,19 @@ class UserService {
 
   // update user by id
   async updateUserById(userId, userData) {
+    const { role, password } = userData;
     const isMongoId = mongoose.Types.ObjectId.isValid(userId);
     if (!isMongoId) {
       throw errorObject(400, "Id de usuario invalido");
     }
-    if (userData?.password) {
+
+    if (role && !this.roles.includes(role)) {
+      throw errorObject(400, "El role debe ser mesero o cocinero");
+    }
+
+    if (password) {
       const encryptedPassword = await bcrypt.hash(
-        userData.password,
+        password,
         parseInt(HASH_STEPS)
       );
       userData.password = encryptedPassword;
