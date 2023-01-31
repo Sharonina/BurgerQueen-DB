@@ -17,7 +17,7 @@ const verifyTokenMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, config.JWT_SECRET);
     const today = Date.now() / 1000; //trae fecha en timestamp: ms
     const expirationDate = decoded.exp;
-    if (expirationDate > today) {
+    if (expirationDate < today) {
       const error = errorObject(401, "Token expirado");
       next(error);
     }
@@ -30,7 +30,7 @@ const verifyTokenMiddleware = (req, res, next) => {
 };
 
 const isAdminMiddleware = async (req, res, next) => {
-  const tokenDeclared = res.locals.user;
+  const tokenDecoded = res.locals.user;
   const user = await userService.getUserById(tokenDecoded.user_id);
 
   if (!user.admin) {
@@ -40,7 +40,7 @@ const isAdminMiddleware = async (req, res, next) => {
     );
     next(error);
   }
-  next(error);
+  next();
 };
 
 module.exports = { verifyTokenMiddleware, isAdminMiddleware };

@@ -122,6 +122,27 @@ class UserService {
     }
     return user;
   }
+
+  //login user
+  async login(userData) {
+    const { email, password } = userData;
+    if (!(email && password)) {
+      throw errorObject(400, "Todos los campos son requeridos");
+    }
+    const user = await UserModel.findOne({ email }).exec();
+    if (!user) {
+      throw errorObject(400, "Credenciales invalidas");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw errorObject(400, "Credenciales invalidas");
+    }
+    const token = jwt.sign({ user_id: user._id, email }, JWT_SECRET, {
+      expiresIn: "24h",
+    });
+    const expireDate = new Date().setDate(new Date().getDate() + 1);
+    return { token, expireDate };
+  }
 }
 
 module.exports = UserService;

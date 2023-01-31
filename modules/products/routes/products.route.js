@@ -1,9 +1,15 @@
 const express = require("express");
+const {
+  verifyTokenMiddleware,
+  isAdminMiddleware,
+} = require("../../../middleware/auth");
 
 const ProductService = require("../services/product.service");
 
 const productService = new ProductService();
 const router = express.Router();
+
+router.use(verifyTokenMiddleware);
 
 router.get("/", async (req, res, next) => {
   try {
@@ -25,7 +31,7 @@ router.get("/:productId", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", isAdminMiddleware, async (req, res, next) => {
   try {
     const body = req.body;
     const product = await productService.createProduct(body);
