@@ -10,7 +10,11 @@ const productSchema = new mongoose.Schema({
     default: new Date(),
     required: true,
   },
-  // restaurrant: { type: mongoose.Schema.Types.ObjectId, ref:'restaurant'},
+  restaurant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "restaurant",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("product", productSchema); //enviamos el schema como modelo
