@@ -15,6 +15,7 @@ class ProductService {
       throw errorObject(400, "Limit y page deben ser mayor a 1");
     }
     return await ProductModel.find()
+      .populate("restaurant")
       .limit(limit)
       .skip(limit * (page - 1))
       .exec();
@@ -26,7 +27,9 @@ class ProductService {
     if (!isMongoId) {
       throw errorObject(400, "Id de producto invalido");
     }
-    const product = await ProductModel.findById(productId).exec();
+    const product = await ProductModel.findById(productId)
+      .populate("restaurant")
+      .exec();
     if (!product) {
       throw errorObject(404, "Producto no encontrado");
     }
@@ -36,7 +39,7 @@ class ProductService {
   // create product
   async createProduct(productData) {
     // validate request
-    const { name, price, type, image, date_entry } = productData;
+    const { name, price, type, image, restaurant } = productData;
     if (!(name && price && type)) {
       throw errorObject(400, "Los campos: name, price y type son requeridos");
     }
@@ -50,12 +53,19 @@ class ProductService {
       );
     }
 
+    // check if restaurant id is valid
+    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
+    if (!isMongoId) {
+      throw errorObject(400, "Id de restaurante invalido");
+    }
+
     // create product in db
     const product = await ProductModel.create({
-      name,
+      name, //lo mismo a hacer name:name
       price,
       type,
       image,
+      restaurant,
       date_entry: new Date(),
     });
 
