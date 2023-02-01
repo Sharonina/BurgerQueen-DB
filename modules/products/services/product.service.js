@@ -2,6 +2,9 @@ const { errorObject } = require("../../../utils/errors.utils");
 const mongoose = require("mongoose");
 
 const ProductModel = require("../models/product.model");
+const RestaurantService = require("../../restaurants/services/restaurant.service");
+
+restaurantService = new RestaurantService();
 
 class ProductService {
   constructor() {}
@@ -57,6 +60,14 @@ class ProductService {
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
     if (!isMongoId) {
       throw errorObject(400, "Id de restaurante invalido");
+    }
+
+    // validate retaurant existance
+    const restaurantExist = await restaurantService.getRestaurantById(
+      restaurant
+    );
+    if (!restaurantExist) {
+      throw errorObject(400, "Restaurante no encontrado");
     }
 
     // create product in db
