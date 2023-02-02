@@ -92,7 +92,7 @@ class ProductService {
     const product = await ProductModel.findByIdAndUpdate(
       productId,
       { $set: productData }, // para que no genere dobles
-      { new: true } //para que retorne el obj nuevo y no el anterior
+      { new: true }
     ).exec();
 
     if (!product) {
