@@ -3,6 +3,7 @@ const detailedOrderAggregation = [
     $lookup: {
       from: "products",
       as: "products",
+      let: { products: "$products" },
       pipeline: [
         {
           $match: {
@@ -26,8 +27,12 @@ const detailedOrderAggregation = [
             },
           },
         },
+        {
+          $project: {
+            __v: 0,
+          },
+        },
       ],
-      let: { products: "$products" },
     },
   },
   {
@@ -48,9 +53,22 @@ const detailedOrderAggregation = [
   {
     $lookup: {
       from: "restaurants",
-      localField: "restaurant",
-      foreignField: "_id",
       as: "restaurant",
+      let: { restaurant: "$restaurant" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ["$_id", "$$restaurant"],
+            },
+          },
+        },
+        {
+          $project: {
+            __v: 0,
+          },
+        },
+      ],
     },
   },
   { $unwind: "$restaurant" },
@@ -59,6 +77,7 @@ const detailedOrderAggregation = [
     $lookup: {
       from: "users",
       as: "waiter",
+      let: { waiter: "$waiter" },
       pipeline: [
         {
           $match: {
@@ -67,13 +86,24 @@ const detailedOrderAggregation = [
             },
           },
         },
+        {
+          $project: {
+            password: 0,
+            __v: 0,
+            admin: 0,
+            email: 0,
+            restaurant: 0,
+          },
+        },
       ],
-      localField: "waiter",
-      foreignField: "_id",
-      as: "waiter",
     },
   },
   { $unwind: "$waiter" },
+  {
+    $project: {
+      __v: 0,
+    },
+  },
 ];
 
 module.exports = { detailedOrderAggregation };

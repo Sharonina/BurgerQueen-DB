@@ -2,10 +2,13 @@ const mongoose = require("mongoose");
 
 const OrderModel = require("../models/order.model");
 const { detailedOrderAggregation } = require("../utils/aggregations.utils");
+const RestaurantService = require("../../restaurants/services/restaurant.service");
 const { errorObject } = require("../../../utils/errors.utils");
 
+const restaurantService = new RestaurantService();
+
 class OrderService {
-  statuses = ["pending", "canceled", "deliveing", "delivered"];
+  statuses = ["pending", "canceled", "delivering", "delivered"];
   constructor() {}
 
   // get all orders
@@ -83,7 +86,9 @@ class OrderService {
 
   // update order by id
   async updateOrderById(orderId, orderData) {
+    const { restaurant } = orderData;
     const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
+
     if (!isMongoId) {
       throw errorObject(400, "Id de producto invalido");
     }
@@ -115,14 +120,15 @@ class OrderService {
   }
 
   // update order status
-  async updateOrderStatusById(orderId, status) {
+  async updateOrderStatusById(orderId, body) {
+    const { status } = body;
     const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
     if (!isMongoId) {
       throw errorObject(400, "Invalid restaurant id");
     }
 
     // validate order existance
-    const orderExist = await orderService.getOrderById(orderId);
+    const orderExist = await this.getOrderById(orderId);
     if (!orderExist) {
       throw errorObject(400, "Order not found");
     }
@@ -132,7 +138,22 @@ class OrderService {
       throw errorObject(400, "Invalid status");
     }
 
-    return await OrderModel.findByIdAndUpdate(orderId, { status });
+    if (status === "delivered") {
+      return await OrderModel.findByIdAndUpdate(
+        orderId,
+        {
+          status,
+          date_processed: new Date(),
+        },
+        { new: true }
+      );
+    }
+
+    return await OrderModel.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
   }
 
   // delete order by id
