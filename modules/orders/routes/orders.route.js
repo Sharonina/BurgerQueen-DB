@@ -1,56 +1,76 @@
 const express = require("express");
 
+const { verifyTokenMiddleware } = require("../../../middleware/auth");
 const OrderService = require("../services/order.service");
 
 const orderService = new OrderService();
 const router = express.Router();
 
+router.use(verifyTokenMiddleware);
+
+// get all orders
 router.get("/", async (req, res, next) => {
   try {
-    const { limit, page } = req.query;
-    const products = await productService.getAllProducts(limit, page);
-    res.status(200).send(products);
+    const { restaurant, limit, page } = req.query;
+    const orders = await orderService.getAllProducts(restaurant, limit, page);
+    res.status(200).send(orders);
   } catch (error) {
     next(error);
   }
 });
 
+// get order by id
 router.get("/:orderId", async (req, res, next) => {
   try {
     const { orderId } = req.params;
-    const order = await orderService.getProductById(orderId);
+    const order = await orderService.getOrderById(orderId);
     res.status(200).send(order);
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/", isAdminMiddleware, async (req, res, next) => {
+// create order
+router.post("/", async (req, res, next) => {
   try {
     const body = req.body;
-    const product = await productService.createProduct(body);
-    res.status(201).json(product);
+    const order = await orderService.createOrder(body);
+    res.status(201).json(order);
   } catch (error) {
     next(error);
   }
 });
 
-router.put("/:productId", isAdminMiddleware, async (req, res, next) => {
+// update order status
+router.put("/:orderId/status", async (req, res, next) => {
   try {
     const body = req.body;
-    const { productId } = req.params;
-    const product = await productService.updateProductById(productId, body);
-    res.status(200).send(product);
+    const { orderId } = req.params;
+    const order = await orderService.updateOrderStatusById(orderId, body);
+    res.status(200).send(order);
   } catch (error) {
     next(error);
   }
 });
 
-router.delete("/:productId", isAdminMiddleware, async (req, res, next) => {
+// update order by Id
+router.put("/:orderId", async (req, res, next) => {
   try {
-    const { productId } = req.params;
-    const product = await productService.deleteProductById(productId);
-    res.status(200).send(product);
+    const body = req.body;
+    const { orderId } = req.params;
+    const order = await orderService.updateOrderById(orderId, body);
+    res.status(200).send(order);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// delete order
+router.delete("/:orderId", async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.deleteOrderById(orderId);
+    res.status(200).send(order);
   } catch (error) {
     next(error);
   }
