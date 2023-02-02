@@ -12,7 +12,7 @@ router.use(verifyTokenMiddleware);
 router.get("/", async (req, res, next) => {
   try {
     const { restaurant, limit, page } = req.query;
-    const orders = await orderService.getAllProducts(restaurant, limit, page);
+    const orders = await orderService.getAllOrders(restaurant, limit, page);
     res.status(200).send(orders);
   } catch (error) {
     next(error);

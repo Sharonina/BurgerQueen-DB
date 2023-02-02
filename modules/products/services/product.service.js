@@ -12,10 +12,10 @@ class ProductService {
   // get all products
   async getAllProducts(limit = 5, page = 1) {
     if (isNaN(limit) || isNaN(page)) {
-      throw errorObject(400, "Limit y page deben ser números");
+      throw errorObject(400, "Limit and page must be numbers");
     }
     if (limit < 1 || page < 1) {
-      throw errorObject(400, "Limit y page deben ser mayor a 1");
+      throw errorObject(400, "Limit and page must be greater than 1");
     }
     return await ProductModel.find()
       .populate("restaurant")
@@ -28,13 +28,13 @@ class ProductService {
   async getProductById(productId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(productId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de producto invalido");
+      throw errorObject(400, "Invalid id product");
     }
     const product = await ProductModel.findById(productId)
       .populate("restaurant")
       .exec();
     if (!product) {
-      throw errorObject(404, "Producto no encontrado");
+      throw errorObject(404, "Product not found");
     }
     return product;
   }
@@ -44,22 +44,19 @@ class ProductService {
     // validate request
     const { name, price, type, image, restaurant } = productData;
     if (!(name && price && type)) {
-      throw errorObject(400, "Los campos: name, price y type son requeridos");
+      throw errorObject(400, "All input is required");
     }
 
     // check if product already exist
     const oldProduct = await ProductModel.findOne({ name });
     if (oldProduct) {
-      throw errorObject(
-        409,
-        "Producto registrado. Por favor revisa los productos en existencia"
-      );
+      throw errorObject(409, "Product already exist");
     }
 
     // check if restaurant id is valid
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
     if (!isMongoId) {
-      throw errorObject(400, "Id de restaurante invalido");
+      throw errorObject(400, "Invalid restaurant id");
     }
 
     // validate retaurant existance
@@ -67,7 +64,7 @@ class ProductService {
       restaurant
     );
     if (!restaurantExist) {
-      throw errorObject(400, "Restaurante no encontrado");
+      throw errorObject(400, "Restaurant not found");
     }
 
     // create product in db
@@ -89,15 +86,9 @@ class ProductService {
   async updateProductById(productId, productData) {
     const isMongoId = mongoose.Types.ObjectId.isValid(productId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de producto invalido");
+      throw errorObject(400, "Invalid product id");
     }
-    if (productData?.password) {
-      const encryptedPassword = await bcrypt.hash(
-        productData.password,
-        parseInt(HASH_STEPS)
-      );
-      productData.password = encryptedPassword;
-    }
+
     const product = await ProductModel.findByIdAndUpdate(
       productId,
       { $set: productData }, // para que no genere dobles
@@ -105,7 +96,7 @@ class ProductService {
     ).exec();
 
     if (!product) {
-      throw errorObject(404, "producto no encontrado");
+      throw errorObject(404, "Product not found");
     }
     return product;
   }
@@ -114,11 +105,11 @@ class ProductService {
   async deleteProductById(productId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(productId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de producto invalido");
+      throw errorObject(400, "Invalid product id");
     }
     const product = await ProductModel.findByIdAndDelete(productId).exec();
     if (!product) {
-      throw errorObject(404, "Producto no encontrado");
+      throw errorObject(404, "Product not found");
     }
     return product;
   }
