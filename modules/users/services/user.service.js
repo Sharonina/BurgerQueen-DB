@@ -7,16 +7,16 @@ const UserModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
 
 class UserService {
-  roles = ["mesero", "cocinero", "gerente", "administrador"];
+  roles = ["waiter", "chef", "manager", "admin"];
   constructor() {} // dejar en caso de querer añadir atributos
 
   // get all users
   async getAllUsers(limit = 5, page = 1) {
     if (isNaN(limit) || isNaN(page)) {
-      throw errorObject(400, "Limit y page deben ser números");
+      throw errorObject(400, "Limit and page must be numbers");
     }
     if (limit < 1 || page < 1) {
-      throw errorObject(400, "Limit y page deben ser mayor a 1");
+      throw errorObject(400, "Limit and page must be greater than 1");
     }
     return await UserModel.find()
       .limit(limit)
@@ -28,11 +28,11 @@ class UserService {
   async getUserById(userId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(userId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de usuario invalido");
+      throw errorObject(400, "Id de user invalido");
     }
     const user = await UserModel.findById(userId).populate("restaurant").exec();
     if (!user) {
-      throw errorObject(404, "Usuario no encontrado");
+      throw errorObject(404, "User not found");
     }
     return user;
   }
@@ -40,19 +40,34 @@ class UserService {
   // create user
   async createUser(userData) {
     // validate request
-    const { first_name, last_name, email, password, role, admin } = userData;
+    const { first_name, last_name, email, password, role, admin, restaurant } =
+      userData;
     if (!(email && password && first_name && last_name && role)) {
-      throw errorObject(400, "Todos los campos son requeridos");
+      throw errorObject(400, "All input is required");
     }
 
     if (!this.roles.includes(role)) {
-      throw errorObject(400, "El role debe ser mesero o cocinero");
+      throw errorObject(400, "Role must be waiter, chef, manager or admin");
     }
 
     // check if user already exist
     const oldUser = await UserModel.findOne({ email });
     if (oldUser) {
-      throw errorObject(409, "Usuario registrado. Por favor inicia sesión");
+      throw errorObject(409, "User already exist. Please login");
+    }
+
+    // check if restaurant id is valid
+    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
+    if (!isMongoId) {
+      throw errorObject(400, "Invalid restaurant id");
+    }
+
+    // validate retaurant existance
+    const restaurantExist = await restaurantService.getRestaurantById(
+      restaurant
+    );
+    if (!restaurantExist) {
+      throw errorObject(400, "Restaurant not found");
     }
 
     // encrypt user password
@@ -66,6 +81,7 @@ class UserService {
       password: encryptedPassword,
       role,
       admin,
+      restaurant,
     });
 
     // create token
@@ -84,11 +100,11 @@ class UserService {
     const { role, password } = userData;
     const isMongoId = mongoose.Types.ObjectId.isValid(userId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de usuario invalido");
+      throw errorObject(400, "Invalid user id");
     }
 
     if (role && !this.roles.includes(role)) {
-      throw errorObject(400, "El role debe ser mesero o cocinero");
+      throw errorObject(400, "Role must be waiter, chef, manager or admin");
     }
 
     if (password) {
@@ -105,7 +121,7 @@ class UserService {
     ).exec();
 
     if (!user) {
-      throw errorObject(404, "usuario no encontrado");
+      throw errorObject(404, "User not found");
     }
     return user;
   }
@@ -114,11 +130,11 @@ class UserService {
   async deleteUserById(userId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(userId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de usuario invalido");
+      throw errorObject(400, "Invalid user id");
     }
     const user = await UserModel.findByIdAndDelete(userId).exec();
     if (!user) {
-      throw errorObject(404, "Usuario no encontrado");
+      throw errorObject(404, "User not found");
     }
     return user;
   }
@@ -127,15 +143,15 @@ class UserService {
   async login(userData) {
     const { email, password } = userData;
     if (!(email && password)) {
-      throw errorObject(400, "Todos los campos son requeridos");
+      throw errorObject(400, "All input is required");
     }
     const user = await UserModel.findOne({ email }).exec();
     if (!user) {
-      throw errorObject(400, "Credenciales invalidas");
+      throw errorObject(400, "Invalid credentials");
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw errorObject(400, "Credenciales invalidas");
+      throw errorObject(400, "Invalid credentials");
     }
     const token = jwt.sign({ user_id: user._id, email }, JWT_SECRET, {
       expiresIn: "24h",

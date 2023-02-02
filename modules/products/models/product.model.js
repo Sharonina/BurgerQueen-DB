@@ -5,15 +5,15 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, default: 0, required: true },
   type: { type: String, default: null, required: true },
   image: { type: String, default: null, required: false },
-  date_entry: {
-    type: Date,
-    default: new Date(),
-    required: true,
-  },
   restaurant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "restaurant",
     default: null,
+  },
+  date_entry: {
+    type: Date,
+    default: new Date(),
+    required: true,
   },
 });
 

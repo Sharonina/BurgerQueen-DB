@@ -10,11 +10,11 @@ class RestaurantService {
   async getRestaurantById(restaurantId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurantId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de restaurante invalido");
+      throw errorObject(400, "Invalid restaurant id");
     }
     const restaurant = await RestaurantModel.findById(restaurantId).exec();
     if (!restaurant) {
-      throw errorObject(404, "Restaurante no encontrado");
+      throw errorObject(404, "Restaurant not found");
     }
     return restaurant;
   }
@@ -24,7 +24,7 @@ class RestaurantService {
     // validate request
     const { name } = restaurantData;
     if (!name) {
-      throw errorObject(400, "Todos los campos son requeridos");
+      throw errorObject(400, "All input is required");
     }
 
     // create restaurant in db
@@ -36,12 +36,12 @@ class RestaurantService {
   async updateRestaurantById(restaurantId, restaurantData) {
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurantId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de restaurante invalido");
+      throw errorObject(400, "Invalid restaurant id");
     }
 
     const { name } = restaurantData;
     if (!name) {
-      throw errorObject(404, "Restaurante no encontrado");
+      throw errorObject(404, "Restaurant not found");
     }
     return RestaurantModel.findByIdAndUpdate(restaurantId, restaurantData);
   }
@@ -50,13 +50,13 @@ class RestaurantService {
   async deleteRestaurantById(restaurantId) {
     const isMongoId = mongoose.Types.ObjectId.isValid(restaurantId);
     if (!isMongoId) {
-      throw errorObject(400, "Id de restaurante invalido");
+      throw errorObject(400, "Invalid restaurant id");
     }
     const restaurant = await RestaurantModel.findByIdAndDelete(
       restaurantId
     ).exec();
     if (!restaurant) {
-      throw errorObject(404, "Restaurante no encontrado");
+      throw errorObject(404, "Restaurant not found");
     }
     return restaurant;
   }
