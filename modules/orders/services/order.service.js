@@ -4,8 +4,11 @@ const OrderModel = require("../models/order.model");
 const { detailedOrderAggregation } = require("../utils/aggregations.utils");
 const RestaurantService = require("../../restaurants/services/restaurant.service");
 const { errorObject } = require("../../../utils/errors.utils");
+const { isMongoIdValidation } = require("../../../utils/validation.utils");
+const UserService = require("../../users/services/user.service");
 
 const restaurantService = new RestaurantService();
+const userService = new UserService();
 
 class OrderService {
   statuses = ["pending", "canceled", "delivering", "delivered"];
@@ -13,10 +16,7 @@ class OrderService {
 
   // get all orders
   async getAllOrders(restaurant, limit = 10, page = 1) {
-    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
-    if (!isMongoId) {
-      throw errorObject(400, "Id de producto invalido");
-    }
+    isMongoIdValidation([restaurant]);
 
     if (isNaN(limit) || isNaN(page)) {
       throw errorObject(400, "Limit and page must be numbers");
@@ -35,10 +35,8 @@ class OrderService {
 
   // get order by id
   async getOrderById(orderId) {
-    const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid order id");
-    }
+    isMongoIdValidation([orderId]);
+
     const orderResponse = await OrderModel.aggregate([
       { $match: { _id: mongoose.Types.ObjectId(orderId) } },
       ...detailedOrderAggregation,
@@ -54,11 +52,13 @@ class OrderService {
       throw errorObject(400, "All input is required");
     }
 
-    // check if restaurant id is valid
-    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid restaurant id");
+    //check if products is an array
+    if (!Array.isArray(products)) {
+      throw errorObject(400, "Products must be an array");
     }
+
+    // check if ids are valid
+    isMongoIdValidation([waiter, ...products, restaurant]);
 
     // validate restaurant existance
     const restaurantExist = await restaurantService.getRestaurantById(
@@ -66,6 +66,11 @@ class OrderService {
     );
     if (!restaurantExist) {
       throw errorObject(400, "Restaurant not found");
+    }
+
+    const waiterExists = await userService.getUserById(waiter);
+    if (!waiterExists) {
+      throw errorObject(400, "Waiter not found");
     }
 
     // create order in db
@@ -122,10 +127,7 @@ class OrderService {
   // update order status
   async updateOrderStatusById(orderId, body) {
     const { status } = body;
-    const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid restaurant id");
-    }
+    isMongoIdValidation([orderId]);
 
     // validate order existance
     const orderExist = await this.getOrderById(orderId);
@@ -158,10 +160,7 @@ class OrderService {
 
   // delete order by id
   async deleteOrderById(orderId) {
-    const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid order id");
-    }
+    isMongoIdValidation([orderId]);
     const order = await OrderModel.findByIdAndDelete(orderId).exec();
     if (!order) {
       throw errorObject(404, "Order not found");
