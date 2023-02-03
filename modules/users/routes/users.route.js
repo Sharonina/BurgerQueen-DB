@@ -6,8 +6,10 @@ const {
 } = require("../../../middleware/auth");
 
 const UserService = require("../services/user.service");
+const RestaurantService = require("../services/restaurant.service");
 
 const userService = new UserService();
+const restaurantService = new RestaurantService();
 const router = express.Router();
 
 const authenticationMiddlewares = [verifyTokenMiddleware];
@@ -36,7 +38,10 @@ router.get("/:userId", verifyTokenMiddleware, async (req, res, next) => {
 router.post("/admin", hasAdminRegisterKeyMiddleware, async (req, res, next) => {
   try {
     const body = req.body;
+    const { restaurant: restaurantData, admin: adminData } = body;
     body.admin = true;
+    const restaurant = await restaurantService.createRestaurant(restaurantData);
+    admin.restaurant = restaurant._id.toString();
     const user = await userService.createUser(body);
     res.status(201).json(user);
   } catch (error) {
