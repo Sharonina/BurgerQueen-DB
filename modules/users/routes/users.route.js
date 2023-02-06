@@ -25,7 +25,7 @@ router.get("/", adminMiddlewares, async (req, res, next) => {
   }
 });
 
-router.get("/:userId", verifyTokenMiddleware, async (req, res, next) => {
+router.get("/:userId", adminMiddlewares, async (req, res, next) => {
   try {
     const { userId } = req.params;
     const user = await userService.getUserById(userId);
