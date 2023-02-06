@@ -1,11 +1,16 @@
 const mongoose = require("mongoose");
 
-const OrderModel = require("../models/order.model");
 const { detailedOrderAggregation } = require("../utils/aggregations.utils");
-const RestaurantService = require("../../restaurants/services/restaurant.service");
 const { errorObject } = require("../../../utils/errors.utils");
 const { isMongoIdValidation } = require("../../../utils/validation.utils");
+const {
+  toObject,
+  toObjectId,
+} = require("../../../utils/transformations.utils");
+
 const UserService = require("../../users/services/user.service");
+const RestaurantService = require("../../restaurants/services/restaurant.service");
+const OrderModel = require("../models/order.model");
 
 const restaurantService = new RestaurantService();
 const userService = new UserService();
@@ -25,7 +30,7 @@ class OrderService {
       throw errorObject(400, "Limit and page must be greater than 1");
     }
     const orderResponse = await OrderModel.aggregate([
-      { $match: { restaurant: mongoose.Types.ObjectId(restaurant) } },
+      { $match: { restaurant: toObjectId(restaurant) } },
       { $skip: limit * (page - 1) },
       { $limit: Number(limit) },
       ...detailedOrderAggregation,
@@ -38,7 +43,7 @@ class OrderService {
     isMongoIdValidation([orderId]);
 
     const orderResponse = await OrderModel.aggregate([
-      { $match: { _id: mongoose.Types.ObjectId(orderId) } },
+      { $match: { _id: toObjectId(orderId) } },
       ...detailedOrderAggregation,
     ]);
     return orderResponse;
@@ -59,14 +64,6 @@ class OrderService {
 
     // check if ids are valid
     isMongoIdValidation([waiter, ...products, restaurant]);
-
-    // validate restaurant existance
-    const restaurantExist = await restaurantService.getRestaurantById(
-      restaurant
-    );
-    if (!restaurantExist) {
-      throw errorObject(400, "Restaurant not found");
-    }
 
     const waiterExists = await userService.getUserById(waiter);
     if (!waiterExists) {
@@ -91,25 +88,36 @@ class OrderService {
 
   // update order by id
   async updateOrderById(orderId, orderData) {
-    const { restaurant } = orderData;
-    const isMongoId = mongoose.Types.ObjectId.isValid(orderId);
+    const { restaurant, waiter, products } = orderData;
 
-    if (!isMongoId) {
-      throw errorObject(400, "Id de producto invalido");
+    const orderExist = await this.getOrderById(orderId);
+    if (!orderExist) {
+      throw errorObject(404, "Order not found");
     }
 
-    // check if restaurant id is valid
-    const restaurantIsMongoId = mongoose.Types.ObjectId.isValid(restaurant);
-    if (!restaurantIsMongoId) {
-      throw errorObject(400, "Invalid restaurant id");
+    if (products && !Array.isArray(products)) {
+      throw errorObject(400, "Products must be an array");
     }
 
-    // validate restaurant existance
-    const restaurantExist = await restaurantService.getRestaurantById(
-      restaurant
-    );
-    if (!restaurantExist) {
-      throw errorObject(400, "Restaurant not found");
+    const idsToValidate = products
+      ? [orderId, waiter, ...products, restaurant]
+      : [orderId, waiter, restaurant];
+    isMongoIdValidation(idsToValidate.filter((id) => id !== undefined));
+
+    if (waiter) {
+      const waiterExists = await userService.getUserById(waiter);
+      if (!waiterExists) {
+        throw errorObject(404, "waiter not found");
+      }
+    }
+
+    if (restaurant) {
+      const restaurantExists = await restaurantService.getRestaurantrById(
+        restaurant
+      );
+      if (!restaurantExists) {
+        throw errorObject(404, "restaurant not found");
+      }
     }
 
     const order = await OrderModel.findByIdAndUpdate(
