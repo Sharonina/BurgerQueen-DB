@@ -9,7 +9,7 @@ const verifyTokenMiddleware = (req, res, next) => {
   const token = req.headers["authorization"];
 
   if (!token) {
-    const error = errorObject(403, "Token requerido para autenticación");
+    const error = errorObject(401, "Token is required for auth");
     next(error);
   }
 
@@ -18,12 +18,12 @@ const verifyTokenMiddleware = (req, res, next) => {
     const today = Date.now() / 1000; //trae fecha en timestamp: ms
     const expirationDate = decoded.exp;
     if (expirationDate < today) {
-      const error = errorObject(401, "Token expirado");
+      const error = errorObject(401, "Expired token");
       next(error);
     }
     res.locals.user = decoded;
   } catch (err) {
-    const error = errorObject(401, "Token invalido");
+    const error = errorObject(401, "Invalid token");
     next(error);
   }
   return next();
@@ -47,7 +47,7 @@ const hasAdminRegisterKeyMiddleware = async (req, res, next) => {
   const { ADMIN_REGISTER_KEY } = process.env;
   const { adminregisterkey } = req.headers;
   if (adminregisterkey !== ADMIN_REGISTER_KEY) {
-    const error = errorObject(403, "Llave de administrador invalida");
+    const error = errorObject(403, "Invalid admin key");
     next(error);
   }
   next();

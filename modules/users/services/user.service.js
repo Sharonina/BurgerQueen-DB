@@ -131,11 +131,11 @@ class UserService {
     }
     const user = await UserModel.findOne({ email }).exec();
     if (!user) {
-      throw errorObject(400, "Invalid credentials");
+      throw errorObject(404, "Invalid credentials");
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw errorObject(400, "Invalid credentials");
+      throw errorObject(404, "Invalid credentials");
     }
     const token = jwt.sign({ user_id: user._id, email }, JWT_SECRET, {
       expiresIn: "24h",
