@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { errorObject } = require("../../../utils/errors.utils");
+const { isMongoIdValidation } = require("../../../utils/validation.utils");
 const mongoose = require("mongoose");
 
 const UserModel = require("../models/user.model");
@@ -26,10 +27,7 @@ class UserService {
 
   // get user by id
   async getUserById(userId) {
-    const isMongoId = mongoose.Types.ObjectId.isValid(userId);
-    if (!isMongoId) {
-      throw errorObject(400, "Id de user invalido");
-    }
+    isMongoIdValidation([userId]);
     const user = await UserModel.findById(userId).populate("restaurant").exec();
     if (!user) {
       throw errorObject(404, "User not found");
@@ -54,20 +52,6 @@ class UserService {
     const oldUser = await UserModel.findOne({ email });
     if (oldUser) {
       throw errorObject(409, "User already exist. Please login");
-    }
-
-    // check if restaurant id is valid
-    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid restaurant id");
-    }
-
-    // validate retaurant existance
-    const restaurantExist = await restaurantService.getRestaurantById(
-      restaurant
-    );
-    if (!restaurantExist) {
-      throw errorObject(400, "Restaurant not found");
     }
 
     // encrypt user password
