@@ -1,10 +1,12 @@
+require("dotenv").config();
 const path = require("path");
 const { spawn } = require("child_process");
 const kill = require("tree-kill");
 
 const config = require("../config");
+const { json } = require("express");
 
-const port = process.env.PORT || 8888;
+const port = process.env.PORT || 3000;
 const baseUrl = process.env.REMOTE_URL || `http://127.0.0.1:${port}`;
 
 const __e2e = {
@@ -16,12 +18,12 @@ const __e2e = {
   },
   adminToken: null,
   testUserCredentials: {
-    email: "test@test.test",
-    password: "123456",
+    email: config.testUserEmail,
+    password: config.testUserPassword,
   },
   testUserToken: null,
   childProcessPid: null,
-  // in `testObjects` we keep track of objects created during the test run so
+  // in testObjects we keep track of objects created during the test run so
   // that we can clean up before exiting.
   // For example: ['users/foo@bar.baz', 'products/xxx', 'orders/yyy']
   // testObjects: [],
@@ -48,11 +50,12 @@ const fetchWithAuth =
       ...opts,
       headers: {
         ...opts.headers,
-        authorization: `Bearer ${token}`,
+        authorization: `${token}`,
       },
     });
 
 const fetchAsAdmin = (url, opts) => fetchWithAuth(__e2e.adminToken)(url, opts);
+
 const fetchAsTestUser = (url, opts) =>
   fetchWithAuth(__e2e.testUserToken)(url, opts);
 
@@ -79,7 +82,7 @@ const createTestUser = () =>
     .then(({ token }) => Object.assign(__e2e, { testUserToken: token }));
 
 const checkAdminCredentials = () =>
-  fetch("/auth", {
+  fetch("/users/login", {
     method: "POST",
     body: __e2e.adminUserCredentials,
   })
@@ -91,6 +94,20 @@ const checkAdminCredentials = () =>
       return resp.json();
     })
     .then(({ token }) => Object.assign(__e2e, { adminToken: token }));
+
+const checkTestCredentials = () =>
+  fetch("/users/login", {
+    method: "POST",
+    body: __e2e.testUserCredentials,
+  })
+    .then((resp) => {
+      if (resp.status !== 200) {
+        throw new Error("Could not authenticate as test user");
+      }
+
+      return resp.json();
+    })
+    .then(({ token }) => Object.assign(__e2e, { testUserToken: token }));
 
 const waitForServerToBeReady = (retries = 10) =>
   new Promise((resolve, reject) => {
@@ -113,13 +130,11 @@ module.exports = () =>
   new Promise((resolve, reject) => {
     if (process.env.REMOTE_URL) {
       console.info(`Running tests on remote server ${process.env.REMOTE_URL}`);
-      return resolve();
+      return checkAdminCredentials().then(checkTestCredentials).then(resolve);
     }
 
-    // TODO: Configurar DB de tests
-
     console.info("Staring local server...");
-    const child = spawn("npm", ["start", process.env.PORT || 8888], {
+    const child = spawn("npm", ["start", process.env.API_PORT || 3000], {
       cwd: path.resolve(__dirname, "../"),
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -153,7 +168,7 @@ module.exports = () =>
       });
   });
 
-// Export globals - ugly... :-(
+// Export globals - ugly... 🙁
 global.__e2e = __e2e;
 
 // Export stuff to be used in tests!

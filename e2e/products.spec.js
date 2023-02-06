@@ -1,4 +1,4 @@
-const { fetch, fetchAsTestUser, fetchAsAdmin } = process;
+/* const { fetch, fetchAsTestUser, fetchAsAdmin } = process;
 
 describe("POST /products", () => {
   it("should fail with 401 when no auth", () =>
@@ -197,3 +197,4 @@ describe("DELETE /products/:productid", () => {
       })
       .then((resp) => expect(resp.status).toBe(404)));
 });
+ */

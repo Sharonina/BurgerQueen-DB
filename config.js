@@ -1,0 +1,9 @@
+exports.port = process.argv[2] || process.env.PORT || 3000;
+exports.dbUrl = process.env.DB_URL || "mongodb://localhost:27017/test";
+exports.secret = process.env.JWT_SECRET || "esta-es-la-api-de-burger-queen";
+exports.adminEmail = process.env.ADMIN_EMAIL || "admin@localhost";
+exports.adminPassword = process.env.ADMIN_PASSWORD || "changeme";
+exports.adminId = process.env.ADMIN_ID || "5faf1b9e1c9d440000ale1f1";
+exports.testUserEmail = process.env.TEST_USER_EMAIL || "test@localhost";
+exports.testUserPassword = process.env.TEST_USER_PASSWORD || "changeme";
+exports.testUserId = process.env.TEST_USER_ID || "5faf1b9e1c9d440000ale1f1";
