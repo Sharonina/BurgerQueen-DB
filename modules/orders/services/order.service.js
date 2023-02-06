@@ -112,7 +112,7 @@ class OrderService {
     }
 
     if (restaurant) {
-      const restaurantExists = await restaurantService.getRestaurantrById(
+      const restaurantExists = await restaurantService.getRestaurantById(
         restaurant
       );
       if (!restaurantExists) {

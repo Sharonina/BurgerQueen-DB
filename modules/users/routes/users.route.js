@@ -6,7 +6,7 @@ const {
 } = require("../../../middleware/auth");
 
 const UserService = require("../services/user.service");
-const RestaurantService = require("../services/restaurant.service");
+const RestaurantService = require("../../restaurants/services/restaurant.service");
 
 const userService = new UserService();
 const restaurantService = new RestaurantService();
@@ -39,10 +39,10 @@ router.post("/admin", hasAdminRegisterKeyMiddleware, async (req, res, next) => {
   try {
     const body = req.body;
     const { restaurant: restaurantData, admin: adminData } = body;
-    body.admin = true;
+    adminData.admin = true;
     const restaurant = await restaurantService.createRestaurant(restaurantData);
-    admin.restaurant = restaurant._id.toString();
-    const user = await userService.createUser(body);
+    adminData.restaurant = restaurant._id.toString();
+    const user = await userService.createUser(adminData);
     res.status(201).json(user);
   } catch (error) {
     next(error);

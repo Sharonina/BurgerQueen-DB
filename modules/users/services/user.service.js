@@ -54,20 +54,6 @@ class UserService {
       throw errorObject(409, "User already exist. Please login");
     }
 
-    // check if restaurant id is valid
-    const isMongoId = mongoose.Types.ObjectId.isValid(restaurant);
-    if (!isMongoId) {
-      throw errorObject(400, "Invalid restaurant id");
-    }
-
-    // validate retaurant existance
-    const restaurantExist = await restaurantService.getRestaurantById(
-      restaurant
-    );
-    if (!restaurantExist) {
-      throw errorObject(400, "Restaurant not found");
-    }
-
     // encrypt user password
     const encryptedPassword = await bcrypt.hash(password, parseInt(HASH_STEPS));
 
