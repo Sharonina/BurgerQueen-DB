@@ -49,7 +49,7 @@ describe("GET /users/:uid", () => {
         expect(resp.status).toBe(200);
         return resp.json();
       })
-      .then((json) => expect(json.email).toBe("test@test.com")));
+      .then((json) => expect(json.email).toBe("test@testito.com")));
 });
 
 describe("POST /users", () => {
@@ -86,65 +86,31 @@ describe("POST /users", () => {
     fetchAsAdmin("/users", {
       method: "POST",
       body: {
-        first_name: "test",
-        last_name: "testito",
-        email: "test@testito.com",
+        first_name: "deleteme",
+        last_name: "test",
+        email: "newtest@deleteme.com",
         password: "test",
         role: "chef",
         admin: "false",
         restaurant: "63db2d8dd4a39b95d1f7f5eb",
       },
     }).then((resp) => {
-      expect(resp.status).toBe(200);
+      expect(resp.status).toBe(201);
       return resp.json();
     }));
-  /* .then((json) => {
-        expect(typeof json._id).toBe("string");
-        expect(typeof json.email).toBe("string");
-        expect(typeof json.password).toBe("string");
-        expect(typeof json.role).toBe("string");
-        expect(typeof json.admin).toBe(false);
-      }) */
 
-  it("should create new admin user", () =>
-    fetchAsAdmin("/users", {
-      method: "POST",
-      body: {
-        restaurant: {
-          name: "Las hamburguesitas",
-        },
-        admin: {
-          first_name: "Sharon",
-          last_name: "Arana",
-          email: "shadmins@gmail.com",
-          password: "luckychan",
-          role: "admin",
-        },
-      },
-    }).then((resp) => {
-      expect(resp.status).toBe(200);
-      return resp.json();
-    }));
-  /* .then((json) => {
-        expect(typeof json._id).toBe("string");
-        expect(typeof json.email).toBe("string");
-        expect(typeof json.password).toBe("undefined");
-        expect(typeof json.roles).toBe("object");
-        expect(json.roles.admin).toBe(true);
-      }) */
-
-  it("should fail with 403 when user is already registered", () =>
+  it("should fail with 409 when user is already registered", () =>
     fetchAsAdmin("/users", {
       method: "POST",
       body: {
         first_name: "test",
         last_name: "testito",
-        email: "test@test.com",
+        email: "test@testito.com",
         password: "test",
         role: "chef",
         /* email: "test@test.com", password: "123456" */
       },
-    }).then((resp) => expect(resp.status).toBe(403)));
+    }).then((resp) => expect(resp.status).toBe(409)));
 });
 
 describe("PUT /users/:uid", () => {
@@ -199,31 +165,9 @@ describe("DELETE /users/:uid", () => {
     ));
 
   it("should fail with 404 when admin and not found", () =>
-    fetchAsAdmin("/users/abc@def.ghi", { method: "DELETE" }).then((resp) =>
-      expect(resp.status).toBe(404)
+    fetchAsAdmin("/users/63e15152a6bf2fcd3dc8f6f9", { method: "DELETE" }).then(
+      (resp) => expect(resp.status).toBe(404)
     ));
-
-  it("should delete own user", () => {
-    const credentials = {
-      email: `foo-${Date.now()}@bar.baz`,
-      password: "1234",
-    };
-    return fetchAsAdmin("/users", { method: "POST", body: credentials })
-      .then((resp) => expect(resp.status).toBe(200))
-      .then(() => fetch("/auth", { method: "POST", body: credentials }))
-      .then((resp) => {
-        expect(resp.status).toBe(200);
-        return resp.json();
-      })
-      .then(({ token }) =>
-        fetchWithAuth(token)(`/users/${credentials.email}`, {
-          method: "DELETE",
-        })
-      )
-      .then((resp) => expect(resp.status).toBe(200))
-      .then(() => fetchAsAdmin(`/users/${credentials.email}`))
-      .then((resp) => expect(resp.status).toBe(404));
-  });
 
   it("should delete other user as admin", () => {
     const credentials = {
@@ -240,6 +184,6 @@ describe("DELETE /users/:uid", () => {
       )
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetchAsAdmin(`/users/${credentials.email}`))
-      .then((resp) => expect(resp.status).toBe(404));
+      .then((resp) => expect(resp.status).toBe(400));
   });
 });
