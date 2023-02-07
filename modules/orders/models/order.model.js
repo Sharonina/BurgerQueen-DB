@@ -24,4 +24,6 @@ const orderSchema = new mongoose.Schema({
   date_processed: { type: Date, default: null },
 });
 
+orderSchema.index({ waiter: 1, restaurant: 1 });
+
 module.exports = mongoose.model("order", orderSchema); //enviamos el schema como modelo

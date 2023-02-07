@@ -17,4 +17,6 @@ const productSchema = new mongoose.Schema({
   },
 });
 
+productSchema.index({ name: 1, restaurant: 1 });
+
 module.exports = mongoose.model("product", productSchema); //enviamos el schema como modelo
