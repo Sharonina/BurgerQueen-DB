@@ -1,35 +1,233 @@
 # Burger Queen API
 
-Base de datos desarrollada en MongoDB y Express.js
+https://burguerqueenapi.onrender.com
 
+## API Reference: auth
 
-## Users
+```http
+  POST /users/login
+```
 
-- first_name: type: String,
-- last_name: type: String,
-- email: type: String, unique: true,
-- password: type: String,
-- role: type: String,
-- admin: type: Boolean,
-- restaurant: {name: String}
+Request body
 
-## Products
+```
+    {
+        "email": "shadmin@test.com",
+        "password": "1234abc"
+    }
+```
 
+#### Responses
 
-  price: { type: Number, default: 0, required: true },
-  type: { type: String, default: null, required: true },
-  image: { type: String, default: null, required: false },
-  restaurant: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "restaurant",
-    default: null,
-  },
-- name: type: String,
-- price: type: Number,
-- type: type: String,
-- image: type: Url,
-- restaurant: {ref: restaurant}
+| Code  | Message               |
+| :---- | :-------------------- |
+| `200` | OK                    |
+| `400` | All input is required |
+| `404` | Invalid credentials   |
 
-## Restaurants
+## API Reference: admin user
 
-- name: type: String
+```http
+  POST /users/admin
+```
+
+#### Headers
+
+```
+    adminregisterkey: key value
+```
+
+#### Request body
+
+```
+    {
+        "first_name": "Sharon",
+        "last_name": "Test",
+        "email": "shadmin@test.com",
+        "password": "1234abc",
+        "role": "admin",
+        "admin": "true",
+        "restaurant": {
+            "name": "Las Hamburguesitas",
+        }
+    }
+```
+
+| Parameter    | Type      | Description      |
+| :----------- | :-------- | :--------------- |
+| `first_name` | _string_  | Required         |
+| `last_name`  | _string_  | Required         |
+| `email`      | _string_  | Required, unique |
+| `password`   | _string_  | Required         |
+| `role`       | _string_  | Required         |
+| `admin`      | _boolean_ |                  |
+| `restaurant` | _object_  | ref: restaurant  |
+
+#### Responses
+
+| Code  | Message                                     |
+| :---- | :------------------------------------------ |
+| `201` | User created                                |
+| `400` | All input is required                       |
+| `400` | Role must be waiter, chef, admin or manager |
+| `409` | User already exist                          |
+
+## API Reference: users
+
+```http
+  POST /users
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Request body
+
+```
+    {
+        "first_name": "Sharon",
+        "last_name": "Test",
+        "email": "shachef@test.com",
+        "password": "1234abc",
+        "role": "chef",
+        "admin": "false",
+        "restaurant": "63db2d8dd4a39b95d1f7f5eb",
+
+    }
+```
+
+| Parameter    | Type      | Description      |
+| :----------- | :-------- | :--------------- |
+| `first_name` | _string_  | Required         |
+| `last_name`  | _string_  | Required         |
+| `email`      | _string_  | Required, unique |
+| `password`   | _string_  | Required         |
+| `role`       | _string_  | Required         |
+| `admin`      | _boolean_ |                  |
+| `restaurant` | _string_  | ref: restaurant  |
+
+#### Responses
+
+| Code  | Message                                     |
+| :---- | :------------------------------------------ |
+| `201` | User created                                |
+| `400` | All input is required                       |
+| `400` | Role must be waiter, chef, admin or manager |
+| `409` | User already exist                          |
+
+##
+
+```http
+  GET /users
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Querys
+
+```
+    /users?limit=5&page=1
+```
+
+| Query   | Type     | Description                      |
+| :------ | :------- | :------------------------------- |
+| `limit` | _number_ | number of users by page          |
+| `page`  | _number_ | page number based on users limit |
+
+#### Responses
+
+| Code  | Message                               |
+| :---- | :------------------------------------ |
+| `200` | OK                                    |
+| `400` | Limit and page must be numbers        |
+| `400` | Limit and page must be greater than 1 |
+
+##
+
+```http
+  GET /users/:userId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Responses
+
+| Code  | Message         |
+| :---- | :-------------- |
+| `200` | OK              |
+| `400` | Invalid user id |
+| `404` | User not found  |
+
+##
+
+```http
+  PUT /users/:userId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Request body
+
+```
+    {
+        "first_name": "Sharon",
+        "last_name": "Test",
+        "email": "shachef@test.com",
+        "password": "1234abc",
+        "role": "chef",
+        "restaurant": "63db2d8dd4a39b95d1f7f5eb",
+    }
+```
+
+| Parameter    | Type     | Description      |
+| :----------- | :------- | :--------------- |
+| `first_name` | _string_ | Required         |
+| `last_name`  | _string_ | Required         |
+| `email`      | _string_ | Required, unique |
+| `password`   | _string_ | Required         |
+| `role`       | _string_ | Required         |
+| `restaurant` | _string_ | ref: restaurant  |
+
+#### Responses
+
+| Code  | Message                                     |
+| :---- | :------------------------------------------ |
+| `200` | User updated                                |
+| `400` | Invalid user id                             |
+| `400` | Role must be waiter, chef, admin or manager |
+| `404` | User not found                              |
+
+##
+
+```http
+  DELETE /users/:userId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Responses
+
+| Code  | Message         |
+| :---- | :-------------- |
+| `200` | Deleted user    |
+| `400` | Invalid user id |
+| `404` | User not found  |
