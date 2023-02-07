@@ -5,6 +5,7 @@ const { isMongoIdValidation } = require("../../../utils/validation.utils");
 const mongoose = require("mongoose");
 
 const UserModel = require("../models/user.model");
+const userModel = require("../models/user.model");
 const { HASH_STEPS, JWT_SECRET } = process.env;
 
 class UserService {
@@ -27,8 +28,17 @@ class UserService {
 
   // get user by id
   async getUserById(userId) {
-    isMongoIdValidation([userId]);
-    const user = await UserModel.findById(userId).populate("restaurant").exec();
+    //isMongoIdValidation([userId]);
+    let user;
+    const isMongoId = mongoose.Types.ObjectId.isValid(userId);
+    if (!isMongoId) {
+      user = await UserModel.findOne({ email: userId }).exec();
+      if (!user) {
+        throw errorObject(400, "Invalid user id");
+      }
+      return user;
+    }
+    user = await UserModel.findById(userId).populate("restaurant").exec();
     if (!user) {
       throw errorObject(404, "User not found");
     }
@@ -112,11 +122,17 @@ class UserService {
 
   // delete user by id
   async deleteUserById(userId) {
+    let user;
     const isMongoId = mongoose.Types.ObjectId.isValid(userId);
     if (!isMongoId) {
-      throw errorObject(400, "Invalid user id");
+      user = await UserModel.findOne({ email: userId }).exec();
+      if (!user) {
+        throw errorObject(400, "Invalid user id");
+      }
+      user = await userModel.deleteOne({ email: userId });
+      return user;
     }
-    const user = await UserModel.findByIdAndDelete(userId).exec();
+    user = await UserModel.findByIdAndDelete(userId).exec();
     if (!user) {
       throw errorObject(404, "User not found");
     }
