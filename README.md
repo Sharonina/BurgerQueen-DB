@@ -231,3 +231,106 @@ Request body
 | `200` | Deleted user    |
 | `400` | Invalid user id |
 | `404` | User not found  |
+
+## API Reference: restaurants
+
+```http
+  POST /restaurants
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Request body
+
+```
+    {
+        "name": "Las hamburguesitas"
+    }
+```
+
+| Parameter | Type     | Description |
+| :-------- | :------- | :---------- |
+| `name`    | _string_ | Required    |
+
+#### Responses
+
+| Code  | Message               |
+| :---- | :-------------------- |
+| `201` | Restaurant created    |
+| `400` | All input is required |
+
+##
+
+```http
+  GET /restaurants/:restaurantId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Responses
+
+| Code  | Message               |
+| :---- | :-------------------- |
+| `200` | OK                    |
+| `400` | Invalid restaurant id |
+| `404` | Restaurant not found  |
+
+##
+
+```http
+  PUT /restaurants/:restaurantId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Request body
+
+```
+    {
+        "name": "Las hamburguesotas",
+    }
+```
+
+| Parameter | Type     | Description |
+| :-------- | :------- | :---------- |
+| `name`    | _string_ | Required    |
+
+#### Responses
+
+| Code  | Message               |
+| :---- | :-------------------- |
+| `200` | Restaurant updated    |
+| `400` | Invalid restaurant id |
+| `404` | Restaurant not found  |
+
+##
+
+```http
+  DELETE /restaurants/:restaurantId
+```
+
+#### Headers
+
+```
+    authorization: admin token
+```
+
+#### Responses
+
+| Code  | Message               |
+| :---- | :-------------------- |
+| `200` | Deleted restaurant    |
+| `400` | Invalid restaurant id |
+| `404` | Restaurant not found  |
