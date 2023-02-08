@@ -67,7 +67,7 @@ class OrderService {
 
     const waiterExists = await userService.getUserById(waiter);
     if (!waiterExists) {
-      throw errorObject(400, "Waiter not found");
+      throw errorObject(404, "Waiter not found");
     }
 
     // create order in db

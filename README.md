@@ -485,3 +485,161 @@ Request body
 | `200` | Deleted product    |
 | `400` | Invalid product id |
 | `404` | Product not found  |
+
+## API Reference: orders
+
+```http
+  POST /orders
+```
+
+#### Headers
+
+```
+    authorization: user token
+```
+
+#### Request body
+
+```
+    {
+      "client": "Mary",
+      "waiter": "63e13207b2fba17a85ebf9c7",
+      "products": ["63db301bd4a39b95d1f7f601"],
+      "restaurant": "63db2e3ad4a39b95d1f7f5f4"
+    }
+```
+
+| Parameter    | Type     | Description            |
+| :----------- | :------- | :--------------------- |
+| `client`     | _string_ | Required               |
+| `waiter`     | _string_ | Required, ref: user    |
+| `products`   | _array_  | Required, ref: product |
+| `restaurant` | _string_ | ref: restaurant        |
+
+#### Responses
+
+| Code  | Message                   |
+| :---- | :------------------------ |
+| `201` | Order created             |
+| `400` | All input is required     |
+| `400` | Products must be an array |
+| `400` | Invalid restaurant id     |
+| `400` | Invalid user id           |
+| `400` | Invalid product id        |
+| `404` | Waiter not found          |
+| `404` | Restaurant not found      |
+
+##
+
+```http
+  GET /orders?restaurant=restaurantId
+```
+
+#### Headers
+
+```
+    authorization: user token
+```
+
+#### Querys
+
+```
+    /orders?limit=5&page=1
+```
+
+| Query   | Type     | Description                      |
+| :------ | :------- | :------------------------------- |
+| `limit` | _number_ | number of users by page          |
+| `page`  | _number_ | page number based on users limit |
+
+#### Responses
+
+| Code  | Message                               |
+| :---- | :------------------------------------ |
+| `200` | OK                                    |
+| `400` | Limit and page must be numbers        |
+| `400` | Limit and page must be greater than 1 |
+| `400` | Invalid restaurant id                 |
+
+##
+
+```http
+  GET /orders/:orderId
+```
+
+#### Headers
+
+```
+    authorization: user token
+```
+
+#### Responses
+
+| Code  | Message          |
+| :---- | :--------------- |
+| `200` | OK               |
+| `400` | Invalid order id |
+| `404` | Order not found  |
+
+##
+
+```http
+  PUT /orders/:orderId
+```
+
+#### Headers
+
+```
+    authorization: user token
+```
+
+#### Request body
+
+```
+    {
+      "client": "Maria",
+      "waiter": "63e13207b2fba17a85ebf9c7",
+      "products": ["63db301bd4a39b95d1f7f601", "63db301bd4a39b95d1f7f601"],
+      "restaurant": "63db2e3ad4a39b95d1f7f5f4"
+    }
+```
+
+| Parameter    | Type     | Description            |
+| :----------- | :------- | :--------------------- |
+| `client`     | _string_ | Required               |
+| `waiter`     | _string_ | Required, ref: user    |
+| `products`   | _array_  | Required, ref: product |
+| `restaurant` | _string_ | ref: restaurant        |
+
+#### Responses
+
+| Code  | Message                   |
+| :---- | :------------------------ |
+| `201` | Order updated             |
+| `400` | Products must be an array |
+| `400` | Invalid restaurant id     |
+| `400` | Invalid user id           |
+| `400` | Invalid product id        |
+| `404` | Waiter not found          |
+| `404` | Restaurant not found      |
+| `404` | Order not found           |
+
+##
+
+```http
+  DELETE /orders/:orderId
+```
+
+#### Headers
+
+```
+    authorization: user token
+```
+
+#### Responses
+
+| Code  | Message          |
+| :---- | :--------------- |
+| `200` | Deleted order    |
+| `400` | Invalid order id |
+| `404` | Order not found  |
