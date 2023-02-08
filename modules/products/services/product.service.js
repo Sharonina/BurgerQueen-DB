@@ -64,7 +64,7 @@ class ProductService {
       restaurant
     );
     if (!restaurantExist) {
-      throw errorObject(400, "Restaurant not found");
+      throw errorObject(404, "Restaurant not found");
     }
 
     // create product in db
