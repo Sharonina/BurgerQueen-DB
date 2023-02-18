@@ -145,7 +145,10 @@ class UserService {
     if (!(email && password)) {
       throw errorObject(400, "All input is required");
     }
-    const user = await UserModel.findOne({ email }).exec();
+    const user = await UserModel.findOne({ email })
+      .populate("restaurant")
+      .exec();
+
     if (!user) {
       throw errorObject(404, "Invalid credentials");
     }
@@ -157,7 +160,12 @@ class UserService {
       expiresIn: "24h",
     });
     const expireDate = new Date().setDate(new Date().getDate() + 1);
-    return { token, expireDate };
+    const userInfo = user.toObject();
+    return {
+      token,
+      expireDate,
+      userInfo: { ...userInfo, password: undefined },
+    };
   }
 }
 
