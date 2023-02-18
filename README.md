@@ -41,12 +41,14 @@ Request body
 
 ```
     {
-        "first_name": "Sharon",
-        "last_name": "Test",
-        "email": "shadmin@test.com",
-        "password": "1234abc",
-        "role": "admin",
-        "admin": "true",
+      "admin": {
+          "first_name": "Sharon",
+          "last_name": "Test",
+          "email": "shadmin@test.com",
+          "password": "1234abc",
+          "role": "admin",
+          "admin": "true"
+        },
         "restaurant": {
             "name": "Las Hamburguesitas",
         }
