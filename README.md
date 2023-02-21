@@ -1,4 +1,4 @@
-# Burger Queen API
+# Sunshi API
 
 https://burguerqueenapi.onrender.com
 
