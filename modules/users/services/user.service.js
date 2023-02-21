@@ -26,6 +26,27 @@ class UserService {
       .exec();
   }
 
+  //get user by token
+  async getUserByToken(token) {
+    if (!token) {
+      throw errorObject(401, "Access denied. No token provided");
+    }
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await UserModel.findById(decoded.user_id)
+        .populate("restaurant")
+        .exec();
+      if (!user) {
+        throw errorObject(404, "user not found");
+      }
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
+      return userWithoutPassword;
+    } catch (error) {
+      errorObject(401, "Invalid token");
+    }
+  }
+
   // get user by id
   async getUserById(userId) {
     //isMongoIdValidation([userId]);
