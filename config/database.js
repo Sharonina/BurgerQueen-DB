@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-/* Command to run db mac: brew services start mongodb-community@6.0*/
+/* Command to run db mac: brew services start mongodb-community@4.2*/
 
 const { MONGO_URI } = process.env;
 
