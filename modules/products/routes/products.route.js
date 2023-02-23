@@ -5,16 +5,25 @@ const {
 } = require("../../../middleware/auth");
 
 const ProductService = require("../services/product.service");
+const UserService = require("../../users/services/user.service");
 
 const productService = new ProductService();
+const userService = new UserService();
 const router = express.Router();
 
 router.use(verifyTokenMiddleware);
 
 router.get("/", async (req, res, next) => {
   try {
-    const { limit, page } = req.query;
-    const products = await productService.getAllProducts(limit, page);
+    const { limit, page, byCategory } = req.query;
+    const { authorization } = req.headers;
+    const { restaurant } = await UserService.getUserByToken(authorization);
+    const products = await productService.getAllProducts(
+      limit,
+      page,
+      byCategory,
+      restaurant
+    );
     res.status(200).send(products);
   } catch (error) {
     next(error);

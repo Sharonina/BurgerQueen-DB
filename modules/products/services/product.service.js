@@ -10,14 +10,49 @@ class ProductService {
   constructor() {}
 
   // get all products
-  async getAllProducts(limit = 5, page = 1) {
+  async getAllProducts(
+    limit = 5,
+    page = 1,
+    byCategory = false,
+    restaurant = null
+  ) {
     if (isNaN(limit) || isNaN(page)) {
       throw errorObject(400, "Limit and page must be numbers");
     }
     if (limit < 1 || page < 1) {
       throw errorObject(400, "Limit and page must be greater than 1");
     }
-    return await ProductModel.find()
+    if (byCategory) {
+      return await ProductModel.aggregate([
+        {
+          $match: {
+            restaurant: mongoose.Types.ObjectId(restaurant._id),
+          },
+        },
+        {
+          $group: {
+            _id: "$type",
+            products: {
+              $push: {
+                _id: "$_id",
+                name: "$name",
+                price: "$price",
+                type: "$type",
+                image: "$image",
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+            products: 1,
+          },
+        },
+      ]);
+    }
+    return await ProductModel.find({ restaurant }, { __v: 0 })
       .populate("restaurant")
       .limit(limit)
       .skip(limit * (page - 1))
