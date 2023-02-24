@@ -17,7 +17,8 @@ router.get("/", async (req, res, next) => {
   try {
     const { limit, page, byCategory } = req.query;
     const { authorization } = req.headers;
-    const { restaurant } = await UserService.getUserByToken(authorization);
+    const { restaurant } = await userService.getUserByToken(authorization);
+    console.log(restaurant);
     const products = await productService.getAllProducts(
       limit,
       page,
