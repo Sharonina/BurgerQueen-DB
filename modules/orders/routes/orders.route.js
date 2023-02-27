@@ -2,17 +2,26 @@ const express = require("express");
 
 const { verifyTokenMiddleware } = require("../../../middleware/auth");
 const OrderService = require("../services/order.service");
+const UserService = require("../../users/services/user.service");
 
 const orderService = new OrderService();
 const router = express.Router();
+const userService = new UserService();
 
 router.use(verifyTokenMiddleware);
 
 // get all orders
 router.get("/", async (req, res, next) => {
   try {
-    const { restaurant, limit, page } = req.query;
-    const orders = await orderService.getAllOrders(restaurant, limit, page);
+    const { limit, page, byCategory } = req.query;
+    const { authorization } = req.headers;
+    const { restaurant } = await userService.getUserByToken(authorization);
+    const orders = await orderService.getAllOrders(
+      restaurant,
+      limit,
+      page,
+      byCategory
+    );
     res.status(200).send(orders);
   } catch (error) {
     next(error);

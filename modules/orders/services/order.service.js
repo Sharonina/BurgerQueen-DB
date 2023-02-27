@@ -20,7 +20,12 @@ class OrderService {
   constructor() {}
 
   // get all orders
-  async getAllOrders(restaurant, limit = 10, page = 1) {
+  async getAllOrders(
+    restaurant = null,
+    byCategory = false,
+    limit = 10,
+    page = 1
+  ) {
     isMongoIdValidation([restaurant]);
 
     if (isNaN(limit) || isNaN(page)) {
@@ -29,6 +34,45 @@ class OrderService {
     if (limit < 1 || page < 1) {
       throw errorObject(400, "Limit and page must be greater than 1");
     }
+
+    if (byCategory) {
+      return await productModel.aggregate([
+        {
+          $match: {
+            restaurant: mongoose.Types.ObjectId(restaurant._id),
+            date_entry: {
+              $gte: new Date(new Date().setHours(0, 0, 0)),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$type",
+            orders: {
+              $push: {
+                _id: "$_id",
+                client: "$client",
+                waiter: "$waiter",
+                status: "$status",
+                products: "$products",
+                restaurant: "$restaurant",
+                date_entry: "$date_entry",
+                date_processed: "$date_processed",
+                table: "$table",
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+            orders: 1,
+          },
+        },
+      ]);
+    }
+
     const orderResponse = await OrderModel.aggregate([
       { $match: { restaurant: toObjectId(restaurant) } },
       { $skip: limit * (page - 1) },
@@ -52,8 +96,8 @@ class OrderService {
   // create order
   async createOrder(orderData) {
     // validate request
-    const { client, waiter, products, restaurant } = orderData;
-    if (!(client && waiter && products && restaurant)) {
+    const { client, waiter, products, restaurant, table } = orderData;
+    if (!(client && waiter && products && restaurant && table)) {
       throw errorObject(400, "All input is required");
     }
 
@@ -79,6 +123,7 @@ class OrderService {
       restaurant,
       date_entry: new Date(),
       date_processed: null,
+      table,
     });
 
     //return new order
