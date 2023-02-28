@@ -45,6 +45,7 @@ class OrderService {
             },
           },
         },
+        ...detailedOrderAggregation,
         {
           $group: {
             _id: "$status",
