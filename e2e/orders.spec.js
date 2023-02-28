@@ -289,7 +289,7 @@ describe("PUT /orders/:orderId", () => {
   it("should fail with 404 when not found", () =>
     fetchAsAdmin("/orders/xxx", {
       method: "PUT",
-      body: { state: "canceled" },
+      body: { state: "Canceled" },
     }).then((resp) => expect(resp.status).toBe(404)));
 
   it("should fail with 400 when bad props", () =>
@@ -384,7 +384,7 @@ describe("PUT /orders/:orderId", () => {
         return resp.json();
       })
       .then((json) => {
-        expect(json.status).toBe("pending");
+        expect(json.status).toBe("Pending");
         return fetchAsAdmin(`/orders/${json._id}`, {
           method: "PUT",
           body: { status: "preparing" },
@@ -396,7 +396,7 @@ describe("PUT /orders/:orderId", () => {
       })
       .then((json) => expect(json.status).toBe("preparing")));
 
-  it("should update order (set status to delivering)", () =>
+  it("should update order (set status to Delivering)", () =>
     Promise.all([
       fetchAsAdmin("/products", {
         method: "POST",
@@ -423,19 +423,19 @@ describe("PUT /orders/:orderId", () => {
         return resp.json();
       })
       .then((json) => {
-        expect(json.status).toBe("pending");
+        expect(json.status).toBe("Pending");
         return fetchAsAdmin(`/orders/${json._id}`, {
           method: "PUT",
-          body: { status: "delivering" },
+          body: { status: "Delivering" },
         });
       })
       .then((resp) => {
         expect(resp.status).toBe(200);
         return resp.json();
       })
-      .then((json) => expect(json.status).toBe("delivering")));
+      .then((json) => expect(json.status).toBe("Delivering")));
 
-  it("should update order (set status to delivered)", () =>
+  it("should update order (set status to Delivered)", () =>
     Promise.all([
       fetchAsAdmin("/products", {
         method: "POST",
@@ -462,10 +462,10 @@ describe("PUT /orders/:orderId", () => {
         return resp.json();
       })
       .then((json) => {
-        expect(json.status).toBe("pending");
+        expect(json.status).toBe("Pending");
         return fetchAsAdmin(`/orders/${json._id}`, {
           method: "PUT",
-          body: { status: "delivered" },
+          body: { status: "Delivered" },
         });
       })
       .then((resp) => {
@@ -473,7 +473,7 @@ describe("PUT /orders/:orderId", () => {
         return resp.json();
       })
       .then((json) => {
-        expect(json.status).toBe("delivered");
+        expect(json.status).toBe("Delivered");
         expect(typeof json.dateProcessed).toBe("string");
       }));
 });

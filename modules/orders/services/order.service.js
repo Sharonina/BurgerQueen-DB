@@ -16,7 +16,7 @@ const restaurantService = new RestaurantService();
 const userService = new UserService();
 
 class OrderService {
-  statuses = ["pending", "canceled", "delivering", "delivered"];
+  statuses = ["Pending", "Canceled", "Delivering", "Delivered"];
   constructor() {}
 
   // get all orders
@@ -47,7 +47,7 @@ class OrderService {
         },
         {
           $group: {
-            _id: "$type",
+            _id: "$status",
             orders: {
               $push: {
                 _id: "$_id",
@@ -118,7 +118,7 @@ class OrderService {
     const order = await OrderModel.create({
       client,
       waiter,
-      status: "pending",
+      status: "Pending",
       products,
       restaurant,
       date_entry: new Date(),
@@ -193,7 +193,7 @@ class OrderService {
       throw errorObject(400, "Invalid status");
     }
 
-    if (status === "delivered") {
+    if (status === "Delivered") {
       return await OrderModel.findByIdAndUpdate(
         orderId,
         {
