@@ -22,11 +22,11 @@ class OrderService {
   // get all orders
   async getAllOrders(
     restaurant = null,
-    byCategory = false,
     limit = 10,
-    page = 1
+    page = 1,
+    byCategory = false
   ) {
-    isMongoIdValidation([restaurant]);
+    isMongoIdValidation([restaurant._id]);
 
     if (isNaN(limit) || isNaN(page)) {
       throw errorObject(400, "Limit and page must be numbers");
@@ -36,7 +36,7 @@ class OrderService {
     }
 
     if (byCategory) {
-      return await productModel.aggregate([
+      return await OrderModel.aggregate([
         {
           $match: {
             restaurant: mongoose.Types.ObjectId(restaurant._id),

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const ProductModel = require("../models/product.model");
 const RestaurantService = require("../../restaurants/services/restaurant.service");
 
-restaurantService = new RestaurantService();
+const restaurantService = new RestaurantService();
 
 class ProductService {
   constructor() {}
