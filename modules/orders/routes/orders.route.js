@@ -3,6 +3,7 @@ const express = require("express");
 const { verifyTokenMiddleware } = require("../../../middleware/auth");
 const OrderService = require("../services/order.service");
 const UserService = require("../../users/services/user.service");
+const { errorObject } = require("../../../utils/errors.utils");
 
 const orderService = new OrderService();
 const router = express.Router();
@@ -42,7 +43,15 @@ router.get("/:orderId", async (req, res, next) => {
 // create order
 router.post("/", async (req, res, next) => {
   try {
-    const body = req.body;
+    const { authorization } = req.headers;
+    const { restaurant, _id, role } = await userService.getUserByToken(
+      authorization
+    );
+
+    if (role !== "waiter" || role !== "admin") {
+      throw errorObject(403, "Only waiters or admins can create orders");
+    }
+    const body = { ...req.body, restaurant: restaurant._id, waiter: _id };
     const order = await orderService.createOrder(body);
     res.status(201).json(order);
   } catch (error) {

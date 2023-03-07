@@ -40,9 +40,9 @@ class OrderService {
         {
           $match: {
             restaurant: mongoose.Types.ObjectId(restaurant._id),
-            date_entry: {
+            /* date_entry: {
               $gte: new Date(new Date().setHours(0, 0, 0)),
-            },
+            }, */
           },
         },
         ...detailedOrderAggregation,
@@ -129,7 +129,8 @@ class OrderService {
 
     //return new order
     const newOrder = new OrderModel(order);
-    return newOrder.save();
+    const result = await newOrder.save();
+    return await this.getOrderById(result._id);
   }
 
   // update order by id
@@ -175,7 +176,7 @@ class OrderService {
     if (!order) {
       throw errorObject(404, "Order not found");
     }
-    return order;
+    return await this.getOrderById(order._id);
   }
 
   // update order status
@@ -205,11 +206,12 @@ class OrderService {
       );
     }
 
-    return await OrderModel.findByIdAndUpdate(
+    const result = await OrderModel.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     );
+    return await this.getOrderById(result._id);
   }
 
   // delete order by id
