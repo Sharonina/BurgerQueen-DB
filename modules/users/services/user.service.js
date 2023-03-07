@@ -40,7 +40,6 @@ class UserService {
         throw errorObject(404, "user not found");
       }
       const userWithoutPassword = user.toObject();
-      console.log(userWithoutPassword);
       delete userWithoutPassword.password;
       return userWithoutPassword;
     } catch (error) {

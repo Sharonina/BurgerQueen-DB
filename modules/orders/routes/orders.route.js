@@ -48,7 +48,7 @@ router.post("/", async (req, res, next) => {
       authorization
     );
 
-    if (role !== "waiter" || role !== "admin") {
+    if (role !== "waiter" && role !== "admin") {
       throw errorObject(403, "Only waiters or admins can create orders");
     }
     const body = { ...req.body, restaurant: restaurant._id, waiter: _id };
